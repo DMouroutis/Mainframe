@@ -7,10 +7,10 @@
 <style type='text/css' media='all'>
 @import url('userguide.css');
 </style>
-<link rel='stylesheet' type='text/css' media='all' href='userguide.css' />
+<link rel='stylesheet' type='text/css' media='all' href='../userguide.css' />
 
-<script type="text/javascript" src="nav/jquery.js"></script>
-<script type="text/javascript" src="nav/nav.js"></script>
+<script type="text/javascript" src="../nav/jquery.js"></script>
+<script type="text/javascript" src="../nav/nav.js"></script>
 
 <meta http-equiv='expires' content='-1' />
 <meta http-equiv='pragma' content='no-cache' />
@@ -24,15 +24,13 @@
 	<!-- START NAVIGATION -->
 	<div id="nav">
 		<div id="nav_inner">
-			<script type="text/javascript">
-				create_menu('null');
-			</script>
+			<script type="text/javascript">create_menu('../');</script>
 		</div>
 	</div>
 	<div id="nav2">
 		<a name="top"></a><a href="javascript:void(0);"
 			onclick="myHeight.slideToggle('fast');"><img
-			src="images/nav_toggle_darker.jpg" width="154" height="43" border="0"
+			src="../images/nav_toggle_darker.jpg" width="154" height="43" border="0"
 			title="Toggle Table of Contents" alt="Toggle Table of Contents" /></a>
 	</div>
 	<div id="wrapper">
@@ -40,7 +38,7 @@
 			<table cellpadding="0" cellspacing="0" border="0" style="width: 100%">
 				<tr>
 					<td><h1>MainframePHP User Guide Version 0.1 alpha</h1></td>
-					<td id="breadcrumb_right"><a href="toc.html">Table of Contents Page</a></td>
+					<td id="breadcrumb_right"><a href="../toc.html">Table of Contents Page</a></td>
 				</tr>
 			</table>
 		</div>
@@ -49,8 +47,11 @@
 	
 		<table cellpadding="0" cellspacing="0" border="0" style="width: 100%">
 			<tr>
-				<td id="breadcrumb"><a href="http://mainframephp.com/">Mainframe Home</a>
-				 &nbsp;&#8250;&nbsp; Mainframe User Guide</td>
+				<td id="breadcrumb">
+					<a href="http://mainframephp.com/">Mainframe Home</a> &nbsp;&#8250;&nbsp; 
+					<a href="../index.html">Mainframe User Guide</a> &nbsp;&#8250;&nbsp; 
+					Learning Mainframe
+				</td>
 				<td id="searchbox">
 					<form method="get" action="http://www.google.com/search">
 						<input type="hidden" name="as_sitesearch" id="as_sitesearch"
@@ -67,41 +68,17 @@
 	
 		<br clear="all" />
 	
-		<div class="center">
-			<img src="images/mainframe_logo_150.png" border="0" alt="Mainframe logo" />
-		</div>
-	
 	
 		<!-- START CONTENT -->
 		<div id="content">
 	
-	
+			<h1>Learning Mainframe</h1>
+			<p>A list of additional online resources.</p>
 	
 			<h2>Welcome to Mainframe</h2>
 	
-			<p>Mainframe is a framework built on top of CodeIgniter, jQuery,
-			 and some other great open source software. Mainframe does not aim
-			 to compete or replace any of the above software. The end goal is
-			 to act as a currated selection of the best open source software
-			 available for web development. Mainframe calls itself "The complete PHP framework".
+			<p>Mainframe
 			</p>
-	
-	
-			<h2>Who is Mainframe for</h2>
-	
-			<p>Mainframe is right for you if...</p>
-	
-			<ul>
-				<li>You need a solid proven set of tools</li>
-				<li>You want to start developing in seconds</li>
-				<li>You want to create modern AJAX applications</li>
-				<li>You need to create enterprise grade applications</li>
-				<li>You want control over the interface using themes and the assets pipeline</li>
-				<li>You want to distribute your application in one piece, or in parts using plugins</li>
-				<li>You want support for the most popular APIs like twitter, paypal, youtube and others.</li>
-				
-			</ul>
-	
 	
 		</div>
 		<!-- END CONTENT -->
