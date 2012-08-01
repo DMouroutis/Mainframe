@@ -13,7 +13,7 @@
 	
 	<?php $this->load->less('/themes/demo/less/styles.less');?>
 	
-	<?php $this->load->js('/libs/js/jquery-1.7.min.js', 'first');?>
+	<?php $this->load->js('/libs/js/jquery-1.7.2.min.js', 'first');?>
 	
 	<?php echo $this->load->assets();?>
 </head>
