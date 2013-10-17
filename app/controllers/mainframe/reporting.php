@@ -36,6 +36,8 @@ class Reporting extends CI_Controller
 		$site_url = base_url();
 		
 		//For db_changes only:
+		$old_db_version = '';
+		$new_db_version = '';
 		$sql_file_name = '';
 		
 		//In case sql script is saved elsewhere, change this
@@ -53,6 +55,8 @@ class Reporting extends CI_Controller
 				'sql_file_link' => $sql_file_link,
 				'project_author' => $project_author,
 				'project_title' => $project_title,
+				'old_db_version' => $old_db_version,
+				'new_db_version' => $new_db_version,
 				'site_url' => $site_url			
 		);
 		
@@ -897,11 +901,20 @@ class Reporting extends CI_Controller
 				//We want to include ADD command but not for ADD CONSTRAINT.
 				if ((strpos($edited_row,'ADD') !== FALSE) && (strpos($edited_row,'CONSTRAINT') == FALSE))
 				{
-					$case_add = substr($edited_row,strpos($edited_row, 'ADD'));
-					$case_add = explode(']',$case_add);
+					$case_add = substr($edited_row,strpos($edited_row, 'ADD')+4);
+					$case_add = explode(',',$case_add);
+					$case_add = array_map('trim', $case_add);
 					
-					$add_column = substr($case_add[0],strpos($case_add[0], '[')+1);
-					$this->db_changes['tables_altered'][$table_name]['type']['add_column'] = $add_column;					
+					$add_column = array();
+					foreach ($case_add as $add_field)
+					{
+						if(strpos($add_field, '[') === 0)
+						{
+							$add_field = explode(']',$add_field);
+							$add_column[] = substr($add_field[0],strpos($add_field[0], '[')+1);
+						}
+					}
+					$this->db_changes['tables_altered'][$table_name]['type']['add_column'] = $add_column;				
 				}
 				else if (strpos($edited_row,'DROP COLUMN') !== FALSE)
 				{
@@ -927,7 +940,7 @@ class Reporting extends CI_Controller
 					$case_alter = explode(']',$case_alter);
 					
 					$alter_column = substr($case_alter[0],strpos($case_alter[0], '[')+1);
-					$this->db_changes['tables_altered'][$table_name]['type']['alter_column'] = $alter_column;
+					$this->db_changes['tables_altered'][$table_name]['type']['alter_column'][] = $alter_column;
 				}
 			}
 			//CREATE new table command
@@ -975,6 +988,8 @@ class Reporting extends CI_Controller
 		$before_date = $data['before'];
 		$project_title = $data['project_title'];
 		$project_author = $data['project_author'];
+		$old_db_version = $data['old_db_version'];
+		$new_db_version = $data['new_db_version'];
 		
 		// Include the main TCPDF library (search for installation path).
 		require_once($_SERVER['DOCUMENT_ROOT'] . '/libs/php/tcpdf/tcpdf.php');
@@ -990,7 +1005,8 @@ class Reporting extends CI_Controller
 					p {line-height: 0; font-size: 16px; }
 				 </style>';
 		$html .= '<div>';		
-		$html .= '<h1>' . $project_title . ', List of database changes</h1>';
+		$html .= '<h1>' . $project_title . ', DB Changes Report</h1>';
+		$html .= '<h2>from ' . $old_db_version . ' to ' . $new_db_version . '</h2><p></p>';
 		$html .= '<p>Covering <b>' . $since_date . ' to ' . $before_date . '</b></p>';
 		$html .= '<p>Delivered by ' . $project_author . ' on ' . date("d/m/Y") . '</p><p></p>';
 	
@@ -1025,19 +1041,19 @@ class Reporting extends CI_Controller
 				{
 					foreach ($changes as $type => $column)
 					{
-						switch ($type) {
-							case "drop_column":
-								foreach ($column as $column_name)
-								{
+					foreach ($column as $column_name)
+						{
+							switch ($type) {
+								case "drop_column":
 									$html .= '<p>Dropped Column   ' . $column_name . '</p>';
-								}
-								break;
-							case "add_column":
-								$html .= '<p>Added Column   ' . $column . '</p>';
-								break;
-							case "alter_column":
-								$html .= '<p>Altered Column   ' . $column . '</p>';
-								break;
+									break;
+								case "add_column":
+									$html .= '<p>Added Column   ' . $column_name . '</p>';
+									break;
+								case "alter_column":
+									$html .= '<p>Altered Column   ' . $column_name . '</p>';
+									break;
+							}
 						}								
 					}
 					$html .= '<p></p>';
@@ -1046,7 +1062,6 @@ class Reporting extends CI_Controller
 		}
 		if (isset($this->db_changes['tables_created']))
 		{
-			$html .= '<p></p>';
 			$html .= '<h3>Tables created:</h3>';
 	
 			foreach ($this->db_changes['tables_created'] as $table_name => $table)
