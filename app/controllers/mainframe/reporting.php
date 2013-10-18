@@ -36,8 +36,7 @@ class Reporting extends CI_Controller
 		$site_url = base_url();
 		
 		//For db_changes only:
-		$old_db_version = '';
-		$new_db_version = '';
+		$version_number = '';
 		$sql_file_name = '';
 		
 		//In case sql script is saved elsewhere, change this
@@ -55,8 +54,7 @@ class Reporting extends CI_Controller
 				'sql_file_link' => $sql_file_link,
 				'project_author' => $project_author,
 				'project_title' => $project_title,
-				'old_db_version' => $old_db_version,
-				'new_db_version' => $new_db_version,
+				'version_number' => $version_number,
 				'site_url' => $site_url			
 		);
 		
@@ -794,6 +792,7 @@ class Reporting extends CI_Controller
 		$before_date = $data['before'];
 		$project_title = $data['project_title'];
 		$project_author = $data['project_author'];
+		$version_number = $data['version_number'];
 		$site_url = $data['site_url'];
 		
 		// Include the main TCPDF library (search for installation path).
@@ -812,7 +811,8 @@ class Reporting extends CI_Controller
 					p.file {color: #7f7f7f; font-size: 14px;}
 				 </style>';
 		$html .= '<div>';
-		$html .= '<h1>' . $project_title . ', List of changed screens</h1><p></p>';
+		$html .= '<h1>' . $project_title . ', List of changed screens</h1>';
+		$html .= '<h2>Version: ' . $version_number . '</h2><p></p>';
 		$html .= '<p>Covering <b>' . $since_date . ' to ' . $before_date . '</b></p>';
 		$html .= '<p>Delivered by ' . $project_author . ' on ' . date("d/m/Y") . '</p><p></p><p></p>';
 		
@@ -988,8 +988,7 @@ class Reporting extends CI_Controller
 		$before_date = $data['before'];
 		$project_title = $data['project_title'];
 		$project_author = $data['project_author'];
-		$old_db_version = $data['old_db_version'];
-		$new_db_version = $data['new_db_version'];
+		$version_number = $data['version_number'];
 		
 		// Include the main TCPDF library (search for installation path).
 		require_once($_SERVER['DOCUMENT_ROOT'] . '/libs/php/tcpdf/tcpdf.php');
@@ -1006,7 +1005,7 @@ class Reporting extends CI_Controller
 				 </style>';
 		$html .= '<div>';		
 		$html .= '<h1>' . $project_title . ', DB Changes Report</h1>';
-		$html .= '<h2>from ' . $old_db_version . ' to ' . $new_db_version . '</h2><p></p>';
+		$html .= '<h2>Version: ' . $version_number . '</h2><p></p>';
 		$html .= '<p>Covering <b>' . $since_date . ' to ' . $before_date . '</b></p>';
 		$html .= '<p>Delivered by ' . $project_author . ' on ' . date("d/m/Y") . '</p><p></p>';
 	
@@ -1016,7 +1015,7 @@ class Reporting extends CI_Controller
 			$html .= '<h3>Tables discarded:</h3>';
 			foreach ($this->db_changes['tables_dropped'] as $table_name)
 			{
-				$html .= '<p class="delete"><b>' . $table_name . '</b></p>';
+				$html .= '<p><u>' . $table_name . '</u></p>';
 			}
 		}
 		if (isset($this->db_changes['renames']))
@@ -1025,7 +1024,7 @@ class Reporting extends CI_Controller
 			$html .= '<h3>The following have been renamed:</h3>';
 			foreach ($this->db_changes['renames'] as $old_name => $new_name)
 			{
-				$html .= '<p><b>' . $old_name . ' => ' . $new_name . '</b></p>';
+				$html .= '<p>' . $old_name . ' => ' . $new_name . '</p>';
 			}
 		}
 		if (isset($this->db_changes['tables_altered']))
@@ -1035,13 +1034,13 @@ class Reporting extends CI_Controller
 				
 			foreach ($this->db_changes['tables_altered'] as $table_name => $table)
 			{
-				$html .= '<p>Table <b>' . $table_name . ':</b></p>';
+				$html .= '<p>Table <u>' . $table_name . ':</u></p>';
 	
 				foreach ($table as $changes)
 				{
 					foreach ($changes as $type => $column)
 					{
-					foreach ($column as $column_name)
+						foreach ($column as $column_name)
 						{
 							switch ($type) {
 								case "drop_column":
@@ -1066,7 +1065,7 @@ class Reporting extends CI_Controller
 	
 			foreach ($this->db_changes['tables_created'] as $table_name => $table)
 			{
-				$html .= '<p><b>' . $table_name . '</b> with fields:</p>';
+				$html .= '<p><u>' . $table_name . '</u> with fields:</p>';
 	
 				foreach ($table as $field)
 				{
@@ -1102,7 +1101,7 @@ class Reporting extends CI_Controller
 		$pdf->setFontSubsetting(true);
 	
 		// Set font
-		$pdf->SetFont('freesans', '', 14, '', true);
+		$pdf->SetFont('opensans', '', 14, '', true);
 	
 		// Add a page
 		$pdf->AddPage();
