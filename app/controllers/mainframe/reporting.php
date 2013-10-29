@@ -55,7 +55,7 @@ class Reporting extends CI_Controller
 				'project_author' => $project_author,
 				'project_title' => $project_title,
 				'version_number' => $version_number,
-				'site_url' => $site_url			
+				'site_url' => $site_url
 		);
 		
 		return $data;
@@ -805,6 +805,7 @@ class Reporting extends CI_Controller
 		$html = '<style type="text/css">
 					div {word-break:break-all;}
 					h1 {color: #1e5b6d; line-height: 1;}
+					h2 {color: #1e5b6d; line-height: 0;}
 					h4 {line-height: 2.5;}
 					a {color: black;}
 					p {line-height: 0; font-size: 16px;}
@@ -881,15 +882,16 @@ class Reporting extends CI_Controller
 		}
 	
 		//We convert the string into array where each line is an SQL command
-		$file = explode ('GO',$file);
+		$file = explode('GO',$file);
 		$file = array_map('trim', $file);
-	
+		
 		foreach ($file as $key => $line)
 		{
 			//any DROP table commands insert into [tables_dropped]
 			if (strpos($line,'DROP') === 0)
 			{
-				$this->db_changes['tables_dropped'][] = substr($line,strrpos($line, '[')+1,-1);
+				$table_name = substr($line,strrpos($line, '[')+1,-1);
+				$this->db_changes['tables_dropped'][$table_name] = $table_name;
 			}
 			//ALTER table command
 			else if (strpos($line,'ALTER') === 0)
@@ -914,7 +916,7 @@ class Reporting extends CI_Controller
 							$add_column[] = substr($add_field[0],strpos($add_field[0], '[')+1);
 						}
 					}
-					$this->db_changes['tables_altered'][$table_name]['type']['add_column'] = $add_column;				
+					$this->db_changes['tables_altered'][$table_name]['type']['add_column'] = $add_column;					
 				}
 				else if (strpos($edited_row,'DROP COLUMN') !== FALSE)
 				{
@@ -972,9 +974,37 @@ class Reporting extends CI_Controller
 					$old_name = substr($edited_row[0],strrpos($edited_row[0], '[')+1,-2);
 					$new_name = substr($edited_row[1],strpos($edited_row[1], "'")+1,-1);
 						
-					$this->db_changes['renames'][$old_name] = $new_name;
+					$this->db_changes['table_renames'][$old_name] = $new_name;
 				}
 			}
+		}
+		//Check if we have table replacement
+		if(isset($this->db_changes['table_renames']) && isset($this->db_changes['tables_created']) && isset($this->db_changes['tables_dropped']))
+		{
+			foreach($this->db_changes['table_renames'] as $old_name => $new_name)
+			{
+				//If the old name of renamed table have been created
+				if (array_key_exists($old_name,$this->db_changes['tables_created']))
+				{
+					//And if the new table name has dropped
+					if (array_key_exists($new_name,$this->db_changes['tables_dropped']))
+					{
+						//Remove them from db alterations
+						unset($this->db_changes['tables_created'][$old_name]);
+						unset($this->db_changes['tables_dropped'][$new_name]);
+						
+						//After the removals we might have empty arrays we need to remove
+						if(empty($this->db_changes['tables_created']))
+						{
+							unset($this->db_changes['tables_created']);
+						}
+						if(empty($this->db_changes['tables_dropped']))
+						{
+							unset($this->db_changes['tables_dropped']);
+						}
+					}
+				}
+			}			
 		}
 	}
 	
@@ -1018,15 +1048,6 @@ class Reporting extends CI_Controller
 				$html .= '<p><u>' . $table_name . '</u></p>';
 			}
 		}
-		if (isset($this->db_changes['renames']))
-		{
-			$html .= '<p></p>';
-			$html .= '<h3>The following have been renamed:</h3>';
-			foreach ($this->db_changes['renames'] as $old_name => $new_name)
-			{
-				$html .= '<p>' . $old_name . ' => ' . $new_name . '</p>';
-			}
-		}
 		if (isset($this->db_changes['tables_altered']))
 		{
 			$html .= '<p></p>';
@@ -1061,6 +1082,7 @@ class Reporting extends CI_Controller
 		}
 		if (isset($this->db_changes['tables_created']))
 		{
+			$html .= '<p></p>';
 			$html .= '<h3>Tables created:</h3>';
 	
 			foreach ($this->db_changes['tables_created'] as $table_name => $table)
@@ -1072,6 +1094,16 @@ class Reporting extends CI_Controller
 					$html .= '<p>' . $field . '</p>';
 				}
 				$html .= '<p></p>';
+			}
+		}
+
+		if (isset($this->db_changes['table_renames']))
+		{
+			$html .= '<p></p>';
+			$html .= '<h3>The following tables have been renamed:</h3>';
+			foreach ($this->db_changes['table_renames'] as $old_name => $new_name)
+			{
+				$html .= '<p><u>' . $old_name . '</u> &nbsp;=>&nbsp; <u>' . $new_name . '</u></p>';
 			}
 		}
 		$html .= '</div>';
